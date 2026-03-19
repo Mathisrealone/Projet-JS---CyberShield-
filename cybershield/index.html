@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CyberShield</title>
+  <link rel="stylesheet" href="/cybershield/style.css">
+</head>
+
+<body>
+  <section id="module-password" class="module-container">
+    <h2>Analyseur de robustesse de mot de passe</h2>
+    <p>Testez la sécurité de votre mot de passe en temps réel.</p>
+
+    <div class="input-group">
+      <label for="password-input">Mot de passe :</label>
+      <input type="password" id="password-input" placeholder="Tapez votre mot de passe ici...">
+    </div>
+
+    <div class="progress-container">
+      <div id="progress-bar" class="progress-bar"></div>
+    </div>
+
+    <div class="feedback-container">
+      <p id="feedback-text">Force : En attente...</p>
+      <p id="score-text">Score : 0 | Entropie : 0 bits</p>
+    </div>
+  </section>
+  <script src="js/password.js"></script>
+</body>
+
+</html>

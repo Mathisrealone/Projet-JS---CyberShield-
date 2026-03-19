@@ -1,0 +1,55 @@
+/* Styles généraux pour le module */
+.module-container {
+	max-width: 600px;
+	margin: 40px auto;
+	padding: 20px;
+	font-family: Arial, sans-serif;
+	background-color: #f9f9f9;
+	border-radius: 8px;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.input-group {
+	margin-bottom: 20px;
+}
+
+.input-group label {
+	display: block;
+	margin-bottom: 8px;
+	font-weight: bold;
+}
+
+.input-group input {
+	width: 100%;
+	padding: 10px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	box-sizing: border-box; /* Pour que le padding ne dépasse pas la largeur */
+}
+
+/* Le conteneur gris de la barre */
+.progress-container {
+	width: 100%;
+	height: 15px;
+	background-color: #e0e0e0;
+	border-radius: 10px;
+	overflow: hidden; /* Empêche la barre de déborder dans les coins */
+	margin-bottom: 15px;
+}
+
+/* La barre colorée en elle-même */
+.progress-bar {
+	width: 0%; /* Par défaut à 0 */
+	height: 100%;
+	background-color: #dc3545; /* Rouge par défaut */
+	/* La magie opère ici : animation fluide sur la largeur et la couleur */
+	transition:
+		width 0.3s ease,
+		background-color 0.3s ease;
+}
+
+/* Retours textuels */
+.feedback-container p {
+	margin: 5px 0;
+	color: #333;
+}
