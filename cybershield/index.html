@@ -27,7 +27,25 @@
       <p id="score-text">Score : 0 | Entropie : 0 bits</p>
     </div>
   </section>
+
+  <section id="caesar-section">
+    <h2>Chiffrement de César</h2>
+    <textarea id="caesar-input" placeholder="Entrez votre message..."></textarea>
+
+    <div class="controls">
+      <label>Décalage (Clé) :</label>
+      <input type="number" id="caesar-key" value="3" min="0" max="25">
+    </div>
+
+    <div class="buttons">
+      <button id="encrypt-btn">Chiffrer</button>
+      <button id="decrypt-btn">Déchiffrer</button>
+    </div>
+
+    <p id="caesar-output"></p>
+  </section>
   <script src="js/password.js"></script>
+  <script src="js/cipher.js"></script>
 </body>
 
 </html>
