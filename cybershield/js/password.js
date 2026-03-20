@@ -22,52 +22,48 @@ const commonPassword = [
 ];
 
 function analyzePassword(password) {
+	if (password === "") return { score: 0, strength: "Faible", isCommon: false };
+
 	let score = 0;
-	let notCommon = true;
+	let isCommon = false;
 	let hasUpper = false;
 	let hasSymbol = false;
 	let hasNumber = false;
 	const symbol = /[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/;
 
 	for (let i = 0; i < commonPassword.length; i++) {
-		if (password == commonPassword[i]) {
-			notCommon = false;
+		if (password.toLowerCase() === commonPassword[i].toLowerCase()) {
+			isCommon = true;
+			break;
 		}
 	}
 
-	if (notCommon === true) {
-		score += 20;
+	if (isCommon) {
+		return {
+			score: 0,
+			strength: "Très Faible",
+			isCommon: true,
+		};
 	}
+
+	score += 20;
 
 	if (password.length > 8) {
 		score += (password.length - 8) * 2;
 	}
 
 	for (let char of password) {
-		if (symbol.test(char)) {
-			hasSymbol = true;
-		}
-
-		if (char === char.toUpperCase() && char !== char.toLowerCase()) {
+		if (symbol.test(char)) hasSymbol = true;
+		if (char === char.toUpperCase() && char !== char.toLowerCase())
 			hasUpper = true;
-		}
-
-		if (char >= "0" && char <= "9") {
-			hasNumber = true;
-		}
+		if (char >= "0" && char <= "9") hasNumber = true;
 	}
 
-	if (hasSymbol) {
-		score += 20;
-	}
+	if (hasSymbol) score += 20;
+	if (hasUpper) score += 15;
+	if (hasNumber) score += 15;
 
-	if (hasUpper) {
-		score += 15;
-	}
-
-	if (hasNumber) {
-		score += 15;
-	}
+	score = Math.min(100, Math.max(0, score));
 
 	let strength = "Faible";
 	if (score > 80) strength = "Très Fort";
@@ -76,26 +72,21 @@ function analyzePassword(password) {
 	return {
 		score: score,
 		strength: strength,
-		isCommon: !notCommon,
+		isCommon: isCommon,
 	};
 }
 
 const progressBar = document.getElementById("progress-bar");
 const scoreDisplay = document.getElementById("score-text");
-
-console.log("Recherche de l'input...");
 const passwordInput = document.getElementById("password-input");
-console.log("Résultat de la recherche :", passwordInput);
+const forceDisplay = document.getElementById("force-text");
 
 passwordInput.addEventListener("input", (e) => {
 	const currentPassword = e.target.value;
 	const result = analyzePassword(currentPassword);
 
-	// A) Appliquer la largeur à la barre
-	// On prend le score et on lui colle un "%" pour que le CSS comprenne
 	progressBar.style.width = result.score + "%";
 
-	// B) Changer la couleur selon le score
 	if (result.score < 40) {
 		progressBar.style.backgroundColor = "red";
 	} else if (result.score < 75) {
@@ -103,45 +94,6 @@ passwordInput.addEventListener("input", (e) => {
 	} else {
 		progressBar.style.backgroundColor = "green";
 	}
-
-	// C) Afficher le texte du score
+	forceDisplay.innerText = result.strength;
 	scoreDisplay.innerText = "Score : " + result.score + "/100";
 });
-
-/* const code = "Shwlwh sdxvh txdqg wx dv wurxyh oh ghxalhph phvvdjh";
-const code2 = "Zaz vq pqoazzq";
-const code3 = "Ov ciowg eiobr asas";
-const code4 = "nazvagd yaz myagd vq f'muyq pq fagf yaz oaqgd";
-function decode(texte) {
-  const Alphabet = "abcdefghijklmnopqrstuvwxyz";
-  for (let i = 0; i < 26; i++) {
-    let result = "";
-    for (let j = 0; j < texte.length; j++) {
-      const char = texte[j].toLowerCase();
-      const index = Alphabet.indexOf(char);
-      if (index === -1) {
-        result += texte[j];
-        continue;
-      }
-
-      let newIndex = (index - i) % 26;
-      if (newIndex < 0) {
-        newIndex += 26;
-      }
-
-      const decodedChar = Alphabet[newIndex];
-
-      if (texte[j] === texte[j].toUpperCase()) {
-        result += decodedChar.toUpperCase();
-      } else {
-        result += decodedChar;
-      }
-    }
-    console.log(`Décalage ${i} → ${result}`);
-  }
-}
-
-decode(code);
-decode(code2);
-decode(code3);
-decode(code4); */
