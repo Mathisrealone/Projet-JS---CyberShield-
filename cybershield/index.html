@@ -23,11 +23,51 @@
     </div>
 
     <div class="feedback-container">
-      <p id="force-text">Force : <span>En attente...</span></p>
+      <p id="force-text">Force : En attente...</p>
       <p id="score-text">Score : 0 | Entropie : 0 bits</p>
     </div>
   </section>
+
+  <section id="caesar-section">
+    <h2>Chiffrement de César</h2>
+    <textarea id="caesar-input" placeholder="Entrez votre message ici..."></textarea>
+
+    <div class="controls">
+      <label>Décalage (Clé 1-25) :</label>
+      <input type="number" id="caesar-key" value="3" min="1" max="25">
+    </div>
+
+    <div class="buttons">
+      <button id="encrypt-btn" class="btn-primary">Chiffrer</button>
+      <button id="decrypt-btn" class="btn-secondary">Déchiffrer</button>
+    </div>
+
+    <div class="analysis-zone">
+      <button id="brute-force-btn" class="btn-warning">🔍 Rechercher la clé (Force Brute)</button>
+    </div>
+
+    <div id="caesar-output-container">
+      <p class="output-label">Résultat :</p>
+      <p id="caesar-output">Le message apparaîtra ici...</p>
+    </div>
+
+    <div id="brute-force-container" style="display: none;">
+      <h3>Résultats de l'analyse</h3>
+      <div class="table-wrapper">
+        <table id="brute-force-table">
+          <thead>
+            <tr>
+              <th>Clé</th>
+              <th>Message décodé</th>
+            </tr>
+          </thead>
+          <tbody id="brute-force-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
   <script src="js/password.js"></script>
+  <script src="js/cipher.js"></script>
 </body>
 
 </html>
