@@ -1,5 +1,6 @@
-/* Styles généraux pour le module */
-.module-container {
+/* --- Styles Communs aux Modules --- */
+.module-container,
+#caesar-section {
 	max-width: 600px;
 	margin: 40px auto;
 	padding: 20px;
@@ -9,114 +10,184 @@
 	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+h2 {
+	margin-top: 0;
+	color: #2c3e50;
+	border-bottom: 2px solid #e0e0e0;
+	padding-bottom: 10px;
+}
+
+/* --- Module Mot de Passe --- */
 .input-group {
 	margin-bottom: 20px;
 }
-
 .input-group label {
 	display: block;
 	margin-bottom: 8px;
 	font-weight: bold;
 }
 
+.input-group input,
+#caesar-input,
+#caesar-key {
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	box-sizing: border-box;
+}
+
 .input-group input {
 	width: 100%;
 	padding: 10px;
-	border: 1px solid #ccc;
-	border-radius: 4px;
-	box-sizing: border-box; /* Pour que le padding ne dépasse pas la largeur */
 }
 
-/* Le conteneur gris de la barre */
 .progress-container {
 	width: 100%;
 	height: 15px;
 	background-color: #e0e0e0;
 	border-radius: 10px;
-	overflow: hidden; /* Empêche la barre de déborder dans les coins */
+	overflow: hidden;
 	margin-bottom: 15px;
 }
 
-/* La barre colorée en elle-même */
 .progress-bar {
-	width: 0%; /* Par défaut à 0 */
+	width: 0%;
 	height: 100%;
-	background-color: #dc3545; /* Rouge par défaut */
-	/* La magie opère ici : animation fluide sur la largeur et la couleur */
+	background-color: #dc3545;
 	transition:
 		width 0.3s ease,
 		background-color 0.3s ease;
 }
 
-/* Retours textuels */
 .feedback-container p {
 	margin: 5px 0;
 	color: #333;
 }
 
-/* News page styles */
-:root{
-	--bg:#0f1724;
-	--card:#0b1220;
-	--muted:#9aa4b2;
-	--accent:#0b6efd;
-	--glass: rgba(255,255,255,0.03);
-}
-body{
-	background: linear-gradient(180deg,#071028 0%, #071930 60%);
-	color: #e6eef8;
-	font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-	margin:0;
-	-webkit-font-smoothing:antialiased;
-}
-.site-header{padding:28px 16px 6px; text-align:center}
-.site-header h1{margin:0;font-size:1.6rem;letter-spacing:0.2px}
-.site-header .lead{margin:6px 0 0;color:var(--muted)}
-.container{max-width:1100px;margin:18px auto;padding:12px}
-.email-analyzer{background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:16px;margin-bottom:18px}
-.email-analyzer h2{margin:0 0 12px;font-size:1.15rem}
-.email-form{display:grid;gap:10px}
-.field label{display:block;margin-bottom:6px;color:#dbeaf8;font-weight:600}
-.field input,.field textarea{width:100%;background:rgba(7,20,40,0.9);border:1px solid rgba(255,255,255,0.12);color:#e6eef8;border-radius:8px;padding:10px;box-sizing:border-box}
-.field input:focus,.field textarea:focus{outline:none;border-color:var(--accent)}
-.analyze-btn{justify-self:start;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:10px 14px;cursor:pointer;font-weight:600}
-.analyze-btn:hover{filter:brightness(1.05)}
-.email-result{margin-top:12px;padding:12px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);color:#dbeaf8}
-.email-result h3{margin:0 0 8px;font-size:1rem}
-.email-result .score{display:inline-block;font-weight:700;padding:4px 8px;border-radius:999px;background:rgba(11,110,253,0.18);margin-bottom:8px}
-.email-result ul{margin:8px 0 0 18px;padding:0}
-.email-result li{margin-bottom:4px;color:var(--muted)}
-.articles-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
-.article-card{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border-radius:10px;padding:12px;box-shadow:0 6px 18px rgba(2,6,23,0.6);cursor:pointer;display:flex;flex-direction:column;min-height:160px;transition:transform .15s ease,box-shadow .15s ease}
-.article-card:hover{transform:translateY(-6px);box-shadow:0 10px 30px rgba(2,6,23,0.7)}
-.article-card img{width:100%;height:140px;object-fit:cover;border-radius:8px;margin-bottom:10px;flex-shrink:0}
-.article-title{font-size:1rem;margin:0 0 6px;color:#fff}
-.article-desc{font-size:0.9rem;color:var(--muted);margin:0 0 8px;flex:1}
-.article-meta{font-size:0.8rem;color:var(--muted)}
-
-/* Modal overrides (in case inline styles are present) */
-#article-modal-overlay{backdrop-filter:blur(4px)}
-#article-modal-overlay > div{max-width:920px;max-height:85vh;padding:20px}
-
-@media (max-width:600px){
-	.article-card img{height:110px}
+/* --- Module César --- */
+#caesar-input {
+	width: 100%;
+	height: 100px;
+	padding: 12px;
+	font-family: inherit;
+	resize: vertical;
+	margin-bottom: 20px;
 }
 
-/* Modal / article readability improvements */
-.modal-overlay{
-	position:fixed;inset:0;background:rgba(2,6,23,0.6);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px;
+.controls {
+	display: flex;
+	align-items: center;
+	gap: 15px;
+	margin-bottom: 20px;
 }
-.modal-box{
-	width:min(920px,100%);max-height:85vh;overflow:auto;background:linear-gradient(180deg,#071428,#081826);border-radius:12px;padding:22px;border:1px solid rgba(255,255,255,0.04);
+#caesar-key {
+	width: 60px;
+	padding: 8px;
 }
-.modal-title{font-size:1.25rem;margin:0 0 6px;color:#fff;line-height:1.2}
-.modal-meta{color:var(--muted);font-size:0.9rem;margin-bottom:12px}
-.modal-image{width:100%;height:320px;object-fit:cover;border-radius:8px;margin-bottom:12px}
-.modal-text{color:#dbeaf8;font-size:1rem;line-height:1.6;margin:0 0 12px;white-space:pre-wrap}
-.modal-link{display:inline-block;color:var(--accent);margin-right:12px}
-.modal-close{background:transparent;border:1px solid rgba(255,255,255,0.06);color:#dbeaf8;padding:8px 12px;border-radius:8px;cursor:pointer}
 
-/* make scrollbar visible but subtle */
-.modal-box::-webkit-scrollbar{width:10px;height:10px}
-.modal-box::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.06);border-radius:8px}
-.modal-box p{max-width:880px}
+.buttons {
+	display: flex;
+	gap: 10px;
+	margin-bottom: 20px;
+}
+
+/* Boutons */
+button {
+	flex: 1;
+	padding: 12px;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-weight: bold;
+	transition: background-color 0.2s ease;
+}
+
+.btn-primary,
+#encrypt-btn {
+	background-color: #2c3e50;
+	color: white;
+}
+.btn-primary:hover,
+#encrypt-btn:hover {
+	background-color: #34495e;
+}
+
+.btn-secondary,
+#decrypt-btn {
+	background-color: #95a5a6;
+	color: white;
+}
+.btn-secondary:hover,
+#decrypt-btn:hover {
+	background-color: #7f8c8d;
+}
+
+.btn-warning {
+	background-color: #e67e22;
+	color: white;
+	width: 100%;
+	margin-top: 10px;
+}
+
+/* Zone de résultat */
+#caesar-output-container {
+	background: #fff;
+	padding: 15px;
+	border-radius: 4px;
+	border-left: 5px solid #2c3e50;
+	margin-top: 20px;
+}
+
+#caesar-output {
+	min-height: 20px;
+	word-wrap: break-word;
+	font-style: italic;
+	color: #555;
+	margin: 0;
+}
+
+.output-label {
+	font-size: 11px;
+	font-weight: bold;
+	color: #95a5a6;
+	margin-bottom: 5px;
+	text-transform: uppercase;
+}
+
+.analysis-zone {
+	margin: 15px 0;
+	border-top: 1px solid #eee;
+	padding-top: 15px;
+}
+
+/* --- Tableau Force Brute --- */
+.table-wrapper {
+	max-height: 300px;
+	overflow-y: auto;
+	border: 1px solid #ddd;
+	margin-top: 15px;
+}
+
+#brute-force-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+#brute-force-table th {
+	background-color: #2c3e50;
+	color: white;
+	padding: 12px;
+	position: sticky;
+	top: 0;
+	text-align: center;
+}
+
+#brute-force-table td {
+	padding: 10px;
+	border: 1px solid #ddd;
+	text-align: center;
+	font-family: monospace;
+}
+
+#brute-force-table tr:nth-child(even) {
+	background-color: #f2f2f2;
+}
