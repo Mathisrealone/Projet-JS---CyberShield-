@@ -22,7 +22,9 @@ const commonPassword = [
 ];
 
 function analyzePassword(password) {
-	if (password === "") return { score: 0, strength: "Faible", isCommon: false };
+	if (password === "") {
+		return { score: 0, strength: "En attente...", isCommon: false };
+	}
 
 	let score = 0;
 	let isCommon = false;
@@ -94,6 +96,7 @@ passwordInput.addEventListener("input", (e) => {
 	} else {
 		progressBar.style.backgroundColor = "green";
 	}
+
 	forceDisplay.innerText = result.strength;
 	scoreDisplay.innerText = "Score : " + result.score + "/100";
 });
