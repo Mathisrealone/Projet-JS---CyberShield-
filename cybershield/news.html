@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>News CyberShield</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <h1>CyberShield — News</h1>
+    <p class="lead">Les dernières actualités cybersécurité en français</p>
+  </header>
+  <main class="container">
+    <section class="email-analyzer" aria-labelledby="email-analyzer-title">
+      <h2 id="email-analyzer-title">Analyser un email</h2>
+      <form id="email-form" class="email-form">
+        <div class="field">
+          <label for="email-from">Expéditeur</label>
+          <input id="email-from" name="from" type="text" placeholder="ex: support@paypa1.com" required>
+        </div>
+        <div class="field">
+          <label for="email-subject">Objet</label>
+          <input id="email-subject" name="subject" type="text" placeholder="ex: Action requise immédiatement" required>
+        </div>
+        <div class="field">
+          <label for="email-body">Message</label>
+          <textarea id="email-body" name="body" rows="4" placeholder="Collez le contenu de l'email..." required></textarea>
+        </div>
+        <button type="submit" class="analyze-btn">Analyser l'email</button>
+      </form>
+
+      <div id="email-result" class="email-result" aria-live="polite">
+        Remplissez le formulaire puis cliquez sur « Analyser l'email ».
+      </div>
+    </section>
+    <div id="titles" class="articles-grid"></div>
+  </main>
+  <script src="js/phishing.js"></script>
+</body>
+</html>
