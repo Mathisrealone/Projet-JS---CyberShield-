@@ -249,6 +249,106 @@ function showArticleModal(a) {
   document.body.appendChild(overlay);
 }
 
+function getSourceName(article) {
+  return (article.source && (article.source.name || article.source)) || "Source inconnue";
+}
+
+function renderArticleCards(root, articles) {
+  root.innerHTML = "";
+
+  if (!articles.length) {
+    root.innerHTML = `<div class="notice">Aucun article pour ce filtre.</div>`;
+    return;
+  }
+
+  articles.forEach((article) => {
+    const card = document.createElement("article");
+    card.className = "article-card";
+
+    if (article.urlToImage) {
+      const img = document.createElement("img");
+      img.src = article.urlToImage;
+      img.alt = article.title || "";
+      card.appendChild(img);
+    }
+
+    const title = document.createElement("h3");
+    title.className = "article-title";
+    title.textContent = article.title || "Sans titre";
+    card.appendChild(title);
+
+    if (article.description) {
+      const desc = document.createElement("p");
+      desc.className = "article-desc";
+      desc.textContent = article.description;
+      card.appendChild(desc);
+    }
+
+    const meta = document.createElement("div");
+    meta.className = "article-meta";
+    meta.textContent = `${getSourceName(article)} • ${article.publishedAt || ""}`;
+    card.appendChild(meta);
+
+    card.addEventListener("click", () => showArticleModal(article));
+    root.appendChild(card);
+  });
+}
+
+function setupSourceFilter(root, articles) {
+  if (typeof document === "undefined") return;
+  if (!root || !root.parentNode) return;
+
+  const existing = document.getElementById("source-filter");
+  if (existing) existing.remove();
+
+  const sourceNames = [...new Set(articles.map((a) => a.source?.name).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b, "fr", { sensitivity: "base" }));
+
+  const filterWrap = document.createElement("div");
+  filterWrap.id = "source-filter";
+  filterWrap.className = "source-filter";
+
+  const label = document.createElement("label");
+  label.setAttribute("for", "source-filter-select");
+  label.textContent = "Filtrer par source :";
+
+  const select = document.createElement("select");
+  select.id = "source-filter-select";
+
+  const allOption = document.createElement("option");
+  allOption.value = "__ALL__";
+  allOption.textContent = "Toutes les sources";
+  select.appendChild(allOption);
+
+  sourceNames.forEach((name) => {
+    const option = document.createElement("option");
+    option.value = name;
+    option.textContent = name;
+    select.appendChild(option);
+  });
+
+  const count = document.createElement("span");
+  count.className = "source-filter-count";
+
+  filterWrap.appendChild(label);
+  filterWrap.appendChild(select);
+  filterWrap.appendChild(count);
+  root.parentNode.insertBefore(filterWrap, root);
+
+  const applyFilter = () => {
+    const selectedSource = select.value;
+    const filtered = selectedSource === "__ALL__"
+      ? articles
+      : articles.filter((article) => getSourceName(article) === selectedSource);
+
+    count.textContent = `${filtered.length} article(s)`;
+    renderArticleCards(root, filtered);
+  };
+
+  select.addEventListener("change", applyFilter);
+  applyFilter();
+}
+
 async function main() {
   setupEmailAnalyzer();
 
@@ -293,39 +393,7 @@ async function main() {
       return;
     }
 
-    // render articles
-    root.innerHTML = "";
-    articles.forEach((article) => {
-      const card = document.createElement("article");
-      card.className = "article-card";
-
-      if (article.urlToImage) {
-        const img = document.createElement("img");
-        img.src = article.urlToImage;
-        img.alt = article.title || "";
-        card.appendChild(img);
-      }
-
-      const title = document.createElement("h3");
-      title.className = "article-title";
-      title.textContent = article.title || "Sans titre";
-      card.appendChild(title);
-
-      if (article.description) {
-        const desc = document.createElement("p");
-        desc.className = "article-desc";
-        desc.textContent = article.description;
-        card.appendChild(desc);
-      }
-
-      const meta = document.createElement("div");
-      meta.className = "article-meta";
-      meta.textContent = `${(article.source && (article.source.name || article.source)) || ""} • ${article.publishedAt || ""}`;
-      card.appendChild(meta);
-
-      card.addEventListener("click", () => showArticleModal(article));
-      root.appendChild(card);
-    });
+    setupSourceFilter(root, articles);
   } catch (err) {
     console.error("Erreur dans main()", err);
     // show friendly error + fallback sample articles
@@ -344,33 +412,7 @@ async function main() {
           "Voici quelques bonnes pratiques : utiliser un gestionnaire, activer la 2FA, et éviter les réutilisations.",
       },
     ];
-    // render sample articles
-    sample.forEach((article) => {
-      const card = document.createElement("article");
-      card.className = "article-card";
-      if (article.urlToImage) {
-        const img = document.createElement("img");
-        img.src = article.urlToImage;
-        img.alt = article.title || "";
-        card.appendChild(img);
-      }
-      const title = document.createElement("h3");
-      title.className = "article-title";
-      title.textContent = article.title || "Sans titre";
-      card.appendChild(title);
-      if (article.description) {
-        const desc = document.createElement("p");
-        desc.className = "article-desc";
-        desc.textContent = article.description;
-        card.appendChild(desc);
-      }
-      const meta = document.createElement("div");
-      meta.className = "article-meta";
-      meta.textContent = `${(article.source && (article.source.name || article.source)) || ""} • ${article.publishedAt || ""}`;
-      card.appendChild(meta);
-      card.addEventListener("click", () => showArticleModal(article));
-      root.appendChild(card);
-    });
+    setupSourceFilter(root, sample);
   }
 }
 

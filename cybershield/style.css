@@ -277,6 +277,35 @@ body {
 	color: #e67e22; /* Orange pour attirer l'attention */
 }
 
+.source-filter {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 16px;
+	background: white;
+	padding: 12px 15px;
+	border-radius: 8px;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+
+.source-filter label {
+	font-weight: 600;
+	color: #2c3e50;
+}
+
+.source-filter select {
+	padding: 8px 10px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	font-family: inherit;
+}
+
+.source-filter-count {
+	margin-left: auto;
+	font-size: 0.9em;
+	color: #7f8c8d;
+}
+
 /* --- Grille d'Articles News --- */
 .articles-grid {
 	display: grid;
