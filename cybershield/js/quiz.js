@@ -1,259 +1,165 @@
 import Quidata from "./quiz-data.js";
 
 const TOTAL_QUESTIONS = 10;
-const TIME_PER_QUESTION = 20; // seconds
+const TIME_PER_QUESTION = 20;
 
-// Points base by difficulty
-const BASE_POINTS = {
-  débutant: 100,
-  intermédiaire: 200,
-  avancé: 300,
-};
-
-// Helpers
-function shuffle(array) {
-  const a = array.slice();
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-function create(tag, attrs = {}, ...children) {
-  const el = document.createElement(tag);
-  Object.entries(attrs).forEach(([k, v]) => {
-    if (k === "class") el.className = v;
-    else if (k === "html") el.innerHTML = v;
-    else el.setAttribute(k, v);
-  });
-  children.forEach((c) => {
-    if (c != null)
-      el.append(typeof c === "string" ? document.createTextNode(c) : c);
-  });
-  return el;
-}
-
-// Quiz state
 let questions = [];
-let currentIndex = 0;
+let indexActuel = 0;
 let score = 0;
+let tempsRestant = TIME_PER_QUESTION;
+let timerId = null;
 let streak = 0;
-let correctCount = 0;
-let timerInterval = null;
-let timeLeft = TIME_PER_QUESTION;
-let perCategory = {}; // { difficulty: {asked, correct} }
+let bonnesReponses = 0;
+let parCategorie = {};
 
-// UI elements
-const app = create("div", { class: "quiz-app", id: "quiz-app" });
-document.body.prepend(app);
+document.body.innerHTML = `
+  <div id="quiz-app" style="max-width:700px;margin:20px auto;font-family:sans-serif">
+    <h2>Quiz CyberShield</h2>
+    <div id="info">Score: <span id="score-text">0</span> | Temps: <span id="timer-text">${TIME_PER_QUESTION}</span>s | Streak: <span id="streak-text">0</span></div>
+    <div id="progress-wrap" style="background:#eee;height:12px;margin:8px 0"><div id="progress-bar" style="height:100%;width:100%;background:#4caf50"></div></div>
+    <div id="question-area">
+      <h3 id="question-text"></h3>
+      <div id="options"></div>
+    </div>
+    <div id="explanation" style="margin-top:10px;color:#333"></div>
+    <button id="next-btn" style="display:none;margin-top:10px">Suivant</button>
+  </div>
+`;
 
-function buildUI() {
-  app.innerHTML = "";
+const questionTexte = document.getElementById("question-text");
+const optionsDiv = document.getElementById("options");
+const scoreAffichage = document.getElementById("score-text");
+const timerAffichage = document.getElementById("timer-text");
+const boutonSuivant = document.getElementById("next-btn");
+const zoneExplication = document.getElementById("explanation");
+const progressBar = document.getElementById("progress-bar");
+const streakAffichage = document.getElementById("streak-text");
 
-  const header = create("h2", {}, "Quiz CyberShield");
-  const progressWrap = create("div", {
-    class: "progress-wrap",
-    id: "progress-wrap",
-  });
-  const progressBar = create("div", {
-    id: "progress-bar",
-    class: "progress-bar",
-  });
-  progressWrap.append(progressBar);
-
-  const qBox = create("div", { id: "question-box", class: "question-box" });
-  const qText = create("div", { id: "question-text", class: "question-text" });
-  const options = create("div", { id: "options", class: "options" });
-
-  const info = create("div", { class: "info-row" });
-  const timerText = create(
-    "span",
-    { id: "timer-text" },
-    `Temps: ${TIME_PER_QUESTION}s`,
-  );
-  const scoreText = create("span", { id: "score-text" }, `Score: 0`);
-  const streakText = create("span", { id: "streak-text" }, `Streak: 0`);
-  info.append(timerText, " | ", scoreText, " | ", streakText);
-
-  const explanation = create("div", {
-    id: "explanation",
-    class: "explanation",
-  });
-  const nextBtn = create(
-    "button",
-    { id: "next-btn", class: "next-btn" },
-    "Suivant",
-  );
-  nextBtn.style.display = "none";
-
-  qBox.append(qText, options);
-  app.append(header, progressWrap, info, qBox, explanation, nextBtn);
-
-  nextBtn.addEventListener("click", () => {
-    nextQuestion();
-  });
+function melanger(tableau) {
+  for (let i = tableau.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    let tmp = tableau[i];
+    tableau[i] = tableau[j];
+    tableau[j] = tmp;
+  }
+  return tableau;
 }
 
-function loadQuestions() {
-  const shuffled = shuffle(Quidata);
-  questions = shuffled.slice(0, Math.min(TOTAL_QUESTIONS, shuffled.length));
+function choisirQuestions() {
+  let copie = Quidata.slice();
+  melanger(copie);
+  questions = copie.slice(0, Math.min(TOTAL_QUESTIONS, copie.length));
 }
 
-function startQuiz() {
-  // reset state
-  currentIndex = 0;
+function demarrerQuiz() {
+  indexActuel = 0;
   score = 0;
+  tempsRestant = TIME_PER_QUESTION;
   streak = 0;
-  correctCount = 0;
-  perCategory = {};
-  buildUI();
-  loadQuestions();
-  renderQuestion();
+  bonnesReponses = 0;
+  parCategorie = {};
+  scoreAffichage.innerText = score;
+  streakAffichage.innerText = streak;
+  choisirQuestions();
+  afficherQuestion();
 }
 
-function renderQuestion() {
-  clearInterval(timerInterval);
-  timeLeft = TIME_PER_QUESTION;
-  const q = questions[currentIndex];
-  const qText = document.getElementById("question-text");
-  const optionsEl = document.getElementById("options");
-  const explanation = document.getElementById("explanation");
-  const nextBtn = document.getElementById("next-btn");
+function afficherQuestion() {
+  clearInterval(timerId);
+  zoneExplication.innerHTML = "";
+  boutonSuivant.style.display = "none";
+  optionsDiv.innerHTML = "";
+  tempsRestant = TIME_PER_QUESTION;
 
-  explanation.innerHTML = "";
-  nextBtn.style.display = "none";
+  let q = questions[indexActuel];
+  if (!q) return;
 
-  qText.textContent = `(${currentIndex + 1}/${questions.length}) ${q.question}`;
-  optionsEl.innerHTML = "";
+  questionTexte.innerText = indexActuel + 1 + ". " + q.question;
 
-  const opts = shuffle(q.options);
-  opts.forEach((opt) => {
-    const b = create("button", { class: "opt-btn" }, opt);
-    b.style.display = "block";
-    b.style.margin = "8px 0";
-    b.addEventListener("click", () => selectAnswer(opt, b));
-    optionsEl.append(b);
+  if (!parCategorie[q.difficulty])
+    parCategorie[q.difficulty] = { asked: 0, correct: 0 };
+  parCategorie[q.difficulty].asked += 1;
+
+  let reponses = melanger(q.options.slice());
+  reponses.forEach((rep) => {
+    let btn = document.createElement("button");
+    btn.innerText = rep;
+    btn.style.display = "block";
+    btn.style.margin = "6px 0";
+    btn.onclick = function () {
+      choisirReponse(rep, q);
+    };
+    optionsDiv.appendChild(btn);
   });
 
+  progressBar.style.width = "100%";
   startTimer();
-  updateInfo();
-}
-
-function updateInfo() {
-  const timerText = document.getElementById("timer-text");
-  const scoreText = document.getElementById("score-text");
-  const streakText = document.getElementById("streak-text");
-  timerText.textContent = `Temps: ${Math.ceil(timeLeft)}s`;
-  scoreText.textContent = `Score: ${score}`;
-  streakText.textContent = `Streak: ${streak}`;
 }
 
 function startTimer() {
-  const progressBar = document.getElementById("progress-bar");
-  clearInterval(timerInterval);
-  const total = TIME_PER_QUESTION;
-  timerInterval = setInterval(() => {
-    timeLeft -= 0.1;
-    if (timeLeft < 0) timeLeft = 0;
-    const pct = (timeLeft / total) * 100;
-    if (progressBar) progressBar.style.width = pct + "%";
-    updateInfo();
-    if (timeLeft <= 0) {
-      clearInterval(timerInterval);
-      handleAnswer(null); // timeout
+  clearInterval(timerId);
+  timerAffichage.innerText = tempsRestant;
+  timerId = setInterval(() => {
+    tempsRestant -= 1;
+    if (tempsRestant < 0) tempsRestant = 0;
+    timerAffichage.innerText = tempsRestant;
+    let pct = (tempsRestant / TIME_PER_QUESTION) * 100;
+    progressBar.style.width = pct + "%";
+    if (tempsRestant === 0) {
+      clearInterval(timerId);
+      choisirReponse(null, questions[indexActuel]);
     }
-  }, 100);
+  }, 1000);
 }
 
-function disableOptions() {
-  document.querySelectorAll(".opt-btn").forEach((b) => (b.disabled = true));
-}
+function choisirReponse(choix, question) {
+  clearInterval(timerId);
+  let tous = document.querySelectorAll("#options button");
+  tous.forEach((b) => (b.disabled = true));
 
-function selectAnswer(selected, buttonEl) {
-  if (!buttonEl) return;
-  disableOptions();
-  clearInterval(timerInterval);
-  handleAnswer(selected);
-}
+  let correct = choix === question.answer;
+  let pointsBase = 100;
+  if (question.difficulty === "intermédiaire") pointsBase = 200;
+  if (question.difficulty === "avancé") pointsBase = 300;
 
-function handleAnswer(selected) {
-  const q = questions[currentIndex];
-  const isCorrect = selected === q.answer;
-  const difficulty = q.difficulty || "débutant";
-  if (!perCategory[difficulty])
-    perCategory[difficulty] = { asked: 0, correct: 0 };
-  perCategory[difficulty].asked += 1;
-
-  let earned = 0;
-  if (isCorrect) {
-    correctCount += 1;
-    perCategory[difficulty].correct += 1;
+  let pointsGagnes = 0;
+  if (correct) {
+    bonnesReponses += 1;
+    parCategorie[question.difficulty].correct += 1;
     streak += 1;
-    const base = BASE_POINTS[difficulty] || 100;
-    const remainingRatio = Math.max(0, timeLeft / TIME_PER_QUESTION);
-    const timeBonus = Math.round(base * 0.5 * remainingRatio); // up to +50%
-    earned = base + timeBonus;
-    if (streak >= 3) {
-      earned = Math.round(earned * 1.5);
-    }
-    score += earned;
+    let ratio = tempsRestant / TIME_PER_QUESTION;
+    let bonusTemps = Math.round(pointsBase * 0.5 * ratio);
+    pointsGagnes = pointsBase + bonusTemps;
+    if (streak >= 3) pointsGagnes = Math.round(pointsGagnes * 1.5);
+    score += pointsGagnes;
+    zoneExplication.innerHTML =
+      "<p style='color:green'>Bonne réponse ! +" + pointsGagnes + " pts</p>";
   } else {
     streak = 0;
+    zoneExplication.innerHTML =
+      "<p style='color:red'>Mauvaise réponse. La bonne réponse était : " +
+      question.answer +
+      "</p>";
   }
 
-  // Show explanation
-  const explanation = document.getElementById("explanation");
-  explanation.innerHTML = "";
-  const correctEl = create(
-    "div",
-    { class: "exp-correct" },
-    `Réponse correcte : ${q.answer}`,
-  );
-  const resultEl = create(
-    "div",
-    { class: "exp-result" },
-    isCorrect ? `Correct ! +${earned} pts` : `Incorrect. +0 pts`,
-  );
-  const autoExp = create(
-    "div",
-    { class: "exp-text" },
-    `Explication : la bonne réponse est "${q.answer}".`,
-  );
-  explanation.append(resultEl, correctEl, autoExp);
+  scoreAffichage.innerText = score;
+  streakAffichage.innerText = streak;
 
-  // reveal next button
-  const nextBtn = document.getElementById("next-btn");
-  nextBtn.style.display = "inline-block";
-  updateInfo();
+  boutonSuivant.style.display = "inline-block";
 }
 
-function nextQuestion() {
-  currentIndex += 1;
-  if (currentIndex >= questions.length) {
-    endQuiz();
+boutonSuivant.onclick = function () {
+  indexActuel += 1;
+  if (indexActuel < questions.length) {
+    afficherQuestion();
   } else {
-    renderQuestion();
+    terminerQuiz();
   }
-}
+};
 
-function endQuiz() {
-  clearInterval(timerInterval);
-  // Persist score and build results
-  const session = {
-    score,
-    date: new Date().toISOString(),
-    correct: correctCount,
-    total: questions.length,
-    perCategory,
-  };
-  saveSession(session);
-  showResults(session);
-}
-
-function loadSessions() {
+function chargerTop() {
   try {
-    const raw = localStorage.getItem("cybershield_scores");
+    let raw = localStorage.getItem("cybershield_top5");
     if (!raw) return [];
     return JSON.parse(raw);
   } catch (e) {
@@ -261,106 +167,82 @@ function loadSessions() {
   }
 }
 
-function saveSession(session) {
-  const arr = loadSessions();
+function sauvegarderScore(session) {
+  let arr = chargerTop();
   arr.push(session);
   arr.sort((a, b) => b.score - a.score);
-  const top5 = arr.slice(0, 5);
-  localStorage.setItem("cybershield_scores", JSON.stringify(top5));
+  arr = arr.slice(0, 5);
+  localStorage.setItem("cybershield_top5", JSON.stringify(arr));
 }
 
-function computeRecommendations(perCategory) {
-  // Find categories with lowest accuracy (asked >=1)
-  const entries = Object.entries(perCategory).map(([cat, v]) => ({
-    cat,
-    asked: v.asked,
-    correct: v.correct,
-    acc: v.asked ? v.correct / v.asked : 0,
-  }));
-  entries.sort((a, b) => a.acc - b.acc);
-  const recs = entries.filter((e) => e.asked > 0 && e.acc < 0.6).slice(0, 3);
-  return recs.map((r) => ({
-    category: r.cat,
-    accuracy: Math.round(r.acc * 100),
-  }));
-}
-
-function showResults(session) {
-  app.innerHTML = "";
-  const header = create("h2", {}, "Résultats");
-  const scoreEl = create("div", {}, `Score: ${session.score}`);
-  const correctEl = create(
-    "div",
-    {},
-    `Réponses correctes: ${session.correct} / ${session.total}`,
-  );
-
-  const saved = loadSessions();
-  const rank =
-    saved.findIndex((s) => s.date === session.date) + 1 || saved.length;
-  const rankEl = create(
-    "div",
-    {},
-    `Classement de cette session: ${rank} / ${Math.max(saved.length, 1)}`,
-  );
-
-  const topTitle = create("h3", {}, "Top 5");
-  const topList = create("ol");
-  saved.forEach((s) => {
-    const li = create(
-      "li",
-      {},
-      `${s.score} pts — ${new Date(s.date).toLocaleString()} (${s.correct}/${s.total})`,
-    );
-    topList.append(li);
-  });
-
-  const recs = computeRecommendations(session.perCategory || {});
-  const recTitle = create("h3", {}, "Recommandations");
-  const recList = create("ul");
-  if (recs.length === 0) {
-    recList.append(
-      create("li", {}, "Bon travail ! Aucun domaine critique à revoir."),
-    );
-  } else {
-    recs.forEach((r) => {
-      recList.append(
-        create(
-          "li",
-          {},
-          `${r.category} — précision ${r.accuracy}% : revoir les bases et exercices intermédiaires.`,
-        ),
-      );
-    });
+function recommander(parCat) {
+  let liste = [];
+  for (let k in parCat) {
+    let v = parCat[k];
+    if (v.asked > 0) {
+      let acc = v.correct / v.asked;
+      if (acc < 0.6) liste.push({ cat: k, acc: Math.round(acc * 100) });
+    }
   }
-
-  const retry = create("button", { id: "retry-btn" }, "Rejouer");
-  retry.addEventListener("click", () => startQuiz());
-
-  app.append(
-    header,
-    scoreEl,
-    correctEl,
-    rankEl,
-    topTitle,
-    topList,
-    recTitle,
-    recList,
-    retry,
-  );
+  liste.sort((a, b) => a.acc - b.acc);
+  return liste.slice(0, 3);
 }
 
-// Basic styles for progress bar and layout (minimal inline)
-const style = document.createElement("style");
-style.textContent = `
-	.progress-wrap{ width:100%; height:12px; background:#eee; margin:8px 0 }
-	.progress-bar{ height:100%; width:100%; background:linear-gradient(90deg,#4caf50,#8bc34a); transition:width .1s linear }
-	.question-box{ margin:12px 0 }
-	#options button{ width:100%; padding:8px; }
-	.explanation{ margin:12px 0; padding:8px; background:#f7f7f7 }
-`;
-document.head.appendChild(style);
+function terminerQuiz() {
+  clearInterval(timerId);
+  let session = {
+    score: score,
+    date: new Date().toISOString(),
+    correct: bonnesReponses,
+    total: questions.length,
+    parCategorie: parCategorie,
+  };
+  sauvegarderScore(session);
 
-// Initialize
-buildUI();
-startQuiz();
+  let top = chargerTop();
+  let recs = recommander(parCategorie);
+
+  let html = "<h2>Résultats</h2>";
+  html += "<p>Score final : " + score + "</p>";
+  html +=
+    "<p>Réponses correctes : " +
+    bonnesReponses +
+    " / " +
+    questions.length +
+    "</p>";
+  html += "<h3>Top 5</h3><ol>";
+  for (let i = 0; i < top.length; i++) {
+    let s = top[i];
+    html +=
+      "<li>" +
+      s.score +
+      " pts — " +
+      new Date(s.date).toLocaleString() +
+      " (" +
+      s.correct +
+      "/" +
+      s.total +
+      ")</li>";
+  }
+  html += "</ol>";
+  html += "<h3>Recommandations</h3><ul>";
+  if (recs.length === 0)
+    html += "<li>Bon travail ! Pas de catégorie critique.</li>";
+  for (let i = 0; i < recs.length; i++) {
+    html +=
+      "<li>" +
+      recs[i].cat +
+      " — précision " +
+      recs[i].acc +
+      "% : revoir cette catégorie.</li>";
+  }
+  html += "</ul>";
+  html += '<button id="rejouer">Rejouer</button>';
+
+  document.getElementById("quiz-app").innerHTML = html;
+  document.getElementById("rejouer").onclick = function () {
+    demarrerQuiz();
+  };
+}
+
+demarrerQuiz();
