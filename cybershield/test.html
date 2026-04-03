@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tests - CyberShield Navigation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 20px auto;
+      background: #f5f5f5;
+    }
+
+    .test-section {
+      background: white;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .test-section h2 {
+      color: #2c3e50;
+      margin-top: 0;
+    }
+
+    .test-button {
+      background: #3498db;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+      font-size: 14px;
+    }
+
+    .test-button:hover {
+      background: #2980b9;
+    }
+
+    .test-button.secondary {
+      background: #95a5a6;
+    }
+
+    .test-button.secondary:hover {
+      background: #7f8c8d;
+    }
+
+    .output {
+      background: #ecf0f1;
+      padding: 10px;
+      border-radius: 4px;
+      margin-top: 10px;
+      font-family: monospace;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .success {
+      color: #27ae60;
+    }
+
+    .warning {
+      color: #f39c12;
+    }
+
+    .error {
+      color: #e74c3c;
+    }
+
+    .info {
+      color: #3498db;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>🧪 Tests - CyberShield Navigation</h1>
+
+  <div class="test-section">
+    <h2>📊 Test du Dashboard</h2>
+    <p>Vérifier que le dashboard affiche les bonnes valeurs.</p>
+    <button class="test-button" onclick="testDashboardDisplay()">Afficher Dashboard</button>
+    <button class="test-button secondary" onclick="testDashboardUpdate()">Mettre à jour</button>
+    <div id="dashboard-output" class="output"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>🔐 Test du DataManager - Password</h2>
+    <p>Tester la persistence des analyses de mot de passe.</p>
+    <button class="test-button" onclick="testPasswordAnalysis()">Ajouter Analyse</button>
+    <button class="test-button" onclick="testGetPassword()">Consulter Données</button>
+    <button class="test-button secondary" onclick="clearPasswordData()">Effacer</button>
+    <div id="password-output" class="output"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>📚 Test du DataManager - Quiz</h2>
+    <p>Tester la persistence des scores de quiz.</p>
+    <button class="test-button" onclick="testAddQuizScore(85)">Score: 85%</button>
+    <button class="test-button" onclick="testAddQuizScore(92)">Score: 92%</button>
+    <button class="test-button" onclick="testGetQuizScore()">Consulter</button>
+    <button class="test-button secondary" onclick="clearQuizData()">Effacer</button>
+    <div id="quiz-output" class="output"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>⚠️ Test du DataManager - Phishing</h2>
+    <p>Tester la persistence des analyses de phishing.</p>
+    <button class="test-button" onclick="addPhishingAnalysis(false)">Email légitime</button>
+    <button class="test-button" onclick="addPhishingAnalysis(true)">Email malveillant</button>
+    <button class="test-button" onclick="testGetPhishing()">Consulter</button>
+    <button class="test-button secondary" onclick="clearPhishingData()">Effacer</button>
+    <div id="phishing-output" class="output"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>🔀 Test Navigation Onglets</h2>
+    <p>Tester la navigation entre onglets.</p>
+    <button class="test-button" onclick="gotoTab('home')">Accueil</button>
+    <button class="test-button" onclick="gotoTab('password')">Password</button>
+    <button class="test-button" onclick="gotoTab('cipher')">Cipher</button>
+    <button class="test-button" onclick="gotoTab('email')">Email</button>
+    <button class="test-button" onclick="gotoTab('news')">News</button>
+    <div id="nav-output" class="output"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>📁 Test localStorage</h2>
+    <p>Consulter directement localStorage.</p>
+    <button class="test-button" onclick="testLocalStorage()">Afficher localStorage</button>
+    <button class="test-button secondary" onclick="dataManager.clear(); alert('Données effacées');">Effacer
+      TOUT</button>
+    <div id="storage-output" class="output"></div>
+  </div>
+
+  <script src="js/data-manager.js"></script>
+  <script src="js/navigation.js"></script>
+  <script src="js/dashboard.js"></script>
+
+  <script>
+    const log = (id, message, type = 'info') => {
+      const el = document.getElementById(id);
+      if (el) {
+        const span = document.createElement('div');
+        span.className = type;
+        span.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+        el.appendChild(span);
+        el.scrollTop = el.scrollHeight;
+      }
+    };
+
+    // === TESTS DASHBOARD ===
+    function testDashboardDisplay() {
+      const dashboard_output = document.getElementById('dashboard-output');
+      dashboard_output.innerHTML = '';
+
+      const stats = {
+        quiz: dataManager.getQuizAverageScore() + '%',
+        password: dataManager.getPasswordStrength(),
+        phishing: dataManager.getPhishingRate() + '%',
+        emails: dataManager.getTotalEmailsAnalyzed(),
+        news: dataManager.getNewsCount()
+      };
+
+      log('dashboard-output', '📊 DASHBOARD STATS', 'success');
+      log('dashboard-output', JSON.stringify(stats, null, 2), 'info');
+    }
+
+    function testDashboardUpdate() {
+      dashboard.refresh();
+      log('dashboard-output', 'Dashboard rafraîchi ✓', 'success');
+    }
+
+    // === TESTS PASSWORD ===
+    function testPasswordAnalysis() {
+      const strengths = ['Faible', 'Moyen', 'Très Fort'];
+      const strength = strengths[Math.floor(Math.random() * 3)];
+      const score = Math.floor(Math.random() * 100);
+
+      dataManager.addPasswordAnalysis(strength, score);
+      log('password-output', `Analyse ajoutée: ${strength} (${score}/100)`, 'success');
+    }
+
+    function testGetPassword() {
+      const password_output = document.getElementById('password-output');
+      password_output.innerHTML = '';
+
+      const strength = dataManager.getPasswordStrength();
+      const analyses = dataManager.get('password-analyses', []);
+
+      log('password-output', `Robustesse actuelle: ${strength}`, 'info');
+      log('password-output', `Nombre d'analyses: ${analyses.length}`, 'info');
+      log('password-output', JSON.stringify(analyses, null, 2), 'info');
+    }
+
+    function clearPasswordData() {
+      dataManager.set('password-last-strength', '-');
+      dataManager.set('password-last-score', 0);
+      dataManager.set('password-analyses', []);
+      log('password-output', 'Données password effacées ✓', 'warning');
+    }
+
+    // === TESTS QUIZ ===
+    function testAddQuizScore(score) {
+      dataManager.addQuizScore(score);
+      log('quiz-output', `Score ${score}% ajouté`, 'success');
+      window.dispatchEvent(new Event('data-updated'));
+    }
+
+    function testGetQuizScore() {
+      const quiz_output = document.getElementById('quiz-output');
+      quiz_output.innerHTML = '';
+
+      const avg = dataManager.getQuizAverageScore();
+      const scores = dataManager.get('quiz-scores', []);
+
+      log('quiz-output', `Score moyen: ${avg}%`, 'info');
+      log('quiz-output', `Nombre de quiz: ${scores.length}`, 'info');
+      log('quiz-output', JSON.stringify(scores, null, 2), 'info');
+    }
+
+    function clearQuizData() {
+      dataManager.set('quiz-scores', []);
+      log('quiz-output', 'Données quiz effacées ✓', 'warning');
+    }
+
+    // === TESTS PHISHING ===
+    function addPhishingAnalysis(isPhishing) {
+      dataManager.addPhishingAnalysis(isPhishing);
+      const type = isPhishing ? '🔴 Malveillant' : '🟢 Légitime';
+      log('phishing-output', `Email ajouté: ${type}`, 'success');
+      window.dispatchEvent(new Event('data-updated'));
+    }
+
+    function testGetPhishing() {
+      const phishing_output = document.getElementById('phishing-output');
+      phishing_output.innerHTML = '';
+
+      const rate = dataManager.getPhishingRate();
+      const total = dataManager.getTotalEmailsAnalyzed();
+      const analyses = dataManager.get('email-analyses', []);
+
+      log('phishing-output', `Total e-mails: ${total}`, 'info');
+      log('phishing-output', `Taux phishing: ${rate}%`, 'info');
+      log('phishing-output', JSON.stringify(analyses, null, 2), 'info');
+    }
+
+    function clearPhishingData() {
+      dataManager.set('email-analyses', []);
+      log('phishing-output', 'Données phishing effacées ✓', 'warning');
+    }
+
+    // === TESTS NAVIGATION ===
+    function gotoTab(tabName) {
+      tabNavigator.showTab(tabName);
+      log('nav-output', `📍 Onglet actif: ${tabName}`, 'success');
+    }
+
+    // === TESTS LOCALSTORAGE ===
+    function testLocalStorage() {
+      const storage_output = document.getElementById('storage-output');
+      storage_output.innerHTML = '';
+
+      log('storage-output', '📁 localStorage (clés CyberShield)', 'info');
+
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.includes('cybershield-')) {
+          const value = localStorage.getItem(key);
+          log('storage-output', `${key}: ${value.substring(0, 100)}...`, 'info');
+        }
+      }
+    }
+
+    // Initialisation
+    window.addEventListener('tab-changed', (e) => {
+      log('nav-output', `Changement d'onglet: ${e.detail.tab}`, 'info');
+    });
+
+    console.log('✅ Tests prêts. Utilisez les boutons ci-dessus.');
+  </script>
+</body>
+
+</html>

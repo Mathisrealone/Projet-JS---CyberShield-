@@ -83,20 +83,28 @@ const scoreDisplay = document.getElementById("score-text");
 const passwordInput = document.getElementById("password-input");
 const forceDisplay = document.getElementById("force-text");
 
-passwordInput.addEventListener("input", (e) => {
-	const currentPassword = e.target.value;
-	const result = analyzePassword(currentPassword);
+if (passwordInput) {
+	passwordInput.addEventListener("input", (e) => {
+		const currentPassword = e.target.value;
+		const result = analyzePassword(currentPassword);
 
-	progressBar.style.width = result.score + "%";
+		progressBar.style.width = result.score + "%";
 
-	if (result.score < 40) {
-		progressBar.style.backgroundColor = "red";
-	} else if (result.score < 75) {
-		progressBar.style.backgroundColor = "orange";
-	} else {
-		progressBar.style.backgroundColor = "green";
-	}
+		if (result.score < 40) {
+			progressBar.style.backgroundColor = "red";
+		} else if (result.score < 75) {
+			progressBar.style.backgroundColor = "orange";
+		} else {
+			progressBar.style.backgroundColor = "green";
+		}
 
-	forceDisplay.innerText = result.strength;
-	scoreDisplay.innerText = "Score : " + result.score + "/100";
-});
+		forceDisplay.innerText = result.strength;
+		scoreDisplay.innerText = "Score : " + result.score + "/100";
+
+		// INTÉGRATION: Sauvegarder dans le DataManager et notifier le dashboard
+		if (currentPassword.length > 0) {
+			dataManager.addPasswordAnalysis(result.strength, result.score);
+			window.dispatchEvent(new Event("data-updated"));
+		}
+	});
+}

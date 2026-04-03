@@ -1,73 +1,188 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CyberShield</title>
-  <link rel="stylesheet" href="/cybershield/style.css">
+  <title>CyberShield - Suite de Sécurité</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-  <section id="module-password" class="module-container">
-    <h2>Analyseur de robustesse de mot de passe</h2>
-    <p>Testez la sécurité de votre mot de passe en temps réel.</p>
-
-    <div class="input-group">
-      <label for="password-input">Mot de passe :</label>
-      <input type="password" id="password-input" placeholder="Tapez votre mot de passe ici...">
-    </div>
-
-    <div class="progress-container">
-      <div id="progress-bar" class="progress-bar"></div>
-    </div>
-
-    <div class="feedback-container">
-      <p id="force-text">Force : En attente...</p>
-      <p id="score-text">Score : 0 | Entropie : 0 bits</p>
-    </div>
-  </section>
-
-  <section id="caesar-section">
-    <h2>Chiffrement de César</h2>
-    <textarea id="caesar-input" placeholder="Entrez votre message ici..."></textarea>
-
-    <div class="controls">
-      <label>Décalage (Clé 1-25) :</label>
-      <input type="number" id="caesar-key" value="3" min="1" max="25">
-    </div>
-
-    <div class="buttons">
-      <button id="encrypt-btn" class="btn-primary">Chiffrer</button>
-      <button id="decrypt-btn" class="btn-secondary">Déchiffrer</button>
-    </div>
-
-    <div class="analysis-zone">
-      <button id="brute-force-btn" class="btn-warning">🔍 Rechercher la clé (Force Brute)</button>
-    </div>
-
-    <div id="caesar-output-container">
-      <p class="output-label">Résultat :</p>
-      <p id="caesar-output">Le message apparaîtra ici...</p>
-    </div>
-
-    <div id="brute-force-container" style="display: none;">
-      <h3>Résultats de l'analyse</h3>
-      <div class="table-wrapper">
-        <table id="brute-force-table">
-          <thead>
-            <tr>
-              <th>Clé</th>
-              <th>Message décodé</th>
-            </tr>
-          </thead>
-          <tbody id="brute-force-body"></tbody>
-        </table>
+  <!-- Navigation globale -->
+  <nav class="navbar">
+    <div class="navbar-container">
+      <h1 class="navbar-title">🛡️ CyberShield</h1>
+      <div class="navbar-actions">
+        <button id="downloadReportBtn" class="btn-report">📥 Télécharger mon rapport</button>
       </div>
     </div>
-  </section>
+  </nav>
+
+  <!-- Système de Tabs -->
+  <div class="tabs-wrapper">
+    <div class="tabs-nav">
+      <button class="tab-btn active" data-tab="home">🏠 Accueil</button>
+      <button class="tab-btn" data-tab="quiz">🧠 Quiz</button>
+      <button class="tab-btn" data-tab="password">🔐 Mot de Passe</button>
+      <button class="tab-btn" data-tab="cipher">🔤 Chiffrement</button>
+      <button class="tab-btn" data-tab="email">⚠️ Phishing</button>
+      <button class="tab-btn" data-tab="news">📰 Actualités</button>
+    </div>
+
+    <!-- TAB: Home/Dashboard -->
+    <section id="home-tab" class="tab-content active">
+      <div class="dashboard">
+        <h2>Tableau de Bord Global</h2>
+        <div class="dashboard-grid">
+          <div class="dashboard-card">
+            <div class="card-icon">📚</div>
+            <h3>Quiz</h3>
+            <p class="card-stat" id="quiz-score">0%</p>
+            <p class="card-label">Score moyen</p>
+          </div>
+          <div class="dashboard-card">
+            <div class="card-icon">🔐</div>
+            <h3>Mot de Passe</h3>
+            <p class="card-stat" id="password-strength">-</p>
+            <p class="card-label">Robustesse</p>
+          </div>
+          <div class="dashboard-card">
+            <div class="card-icon">⚠️</div>
+            <h3>Phishing</h3>
+            <p class="card-stat" id="phishing-rate">0%</p>
+            <p class="card-label">Taux détecté</p>
+          </div>
+          <div class="dashboard-card">
+            <div class="card-icon">📰</div>
+            <h3>Actualités</h3>
+            <p class="card-stat" id="news-count">0</p>
+            <p class="card-label">En cache</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB: Quiz -->
+    <section id="quiz-tab" class="tab-content">
+      <section class="module-container">
+        <h2>Quiz CyberShield</h2>
+        <p>Testez vos connaissances en cybersécurité directement depuis l'accueil.</p>
+        <iframe src="quiz.html" title="Module Quiz CyberShield" class="quiz-frame" loading="lazy"></iframe>
+      </section>
+    </section>
+
+    <!-- TAB: Password Analyzer -->
+    <section id="password-tab" class="tab-content">
+      <section id="module-password" class="module-container">
+        <h2>Analyseur de robustesse de mot de passe</h2>
+        <p>Testez la sécurité de votre mot de passe en temps réel.</p>
+
+        <div class="input-group">
+          <label for="password-input">Mot de passe :</label>
+          <input type="password" id="password-input" placeholder="Tapez votre mot de passe ici...">
+        </div>
+
+        <div class="progress-container">
+          <div id="progress-bar" class="progress-bar"></div>
+        </div>
+
+        <div class="feedback-container">
+          <p id="force-text">Force : En attente...</p>
+          <p id="score-text">Score : 0 | Entropie : 0 bits</p>
+        </div>
+      </section>
+    </section>
+
+    <!-- TAB: Cipher -->
+    <section id="cipher-tab" class="tab-content">
+      <section id="caesar-section" class="module-container">
+        <h2>Chiffrement de César</h2>
+        <textarea id="caesar-input" placeholder="Entrez votre message ici..."></textarea>
+
+        <div class="controls">
+          <label>Décalage (Clé 1-25) :</label>
+          <input type="number" id="caesar-key" value="3" min="1" max="25">
+        </div>
+
+        <div class="buttons">
+          <button id="encrypt-btn" class="btn-primary">Chiffrer</button>
+          <button id="decrypt-btn" class="btn-secondary">Déchiffrer</button>
+        </div>
+
+        <div class="analysis-zone">
+          <button id="brute-force-btn" class="btn-warning">🔍 Rechercher la clé (Force Brute)</button>
+        </div>
+
+        <div id="caesar-output-container">
+          <p class="output-label">Résultat :</p>
+          <p id="caesar-output">Le message apparaîtra ici...</p>
+        </div>
+
+        <div id="brute-force-container" style="display: none;">
+          <h3>Résultats de l'analyse</h3>
+          <div class="table-wrapper">
+            <table id="brute-force-table">
+              <thead>
+                <tr>
+                  <th>Clé</th>
+                  <th>Message décodé</th>
+                </tr>
+              </thead>
+              <tbody id="brute-force-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <!-- TAB: Email/Phishing -->
+    <section id="email-tab" class="tab-content">
+      <section class="module-container email-analyzer" aria-labelledby="email-analyzer-title">
+        <h2>Détecteur de Phishing</h2>
+        <p>Analysez un e-mail pour détecter les signaux de phishing.</p>
+
+        <form id="email-form" class="email-form">
+          <div class="field">
+            <label for="email-from">Expéditeur</label>
+            <input id="email-from" name="from" type="text" placeholder="ex: support@paypa1.com" required>
+          </div>
+          <div class="field">
+            <label for="email-subject">Objet</label>
+            <input id="email-subject" name="subject" type="text" placeholder="ex: Action requise immédiatement"
+              required>
+          </div>
+          <div class="field">
+            <label for="email-body">Message</label>
+            <textarea id="email-body" name="body" rows="4" placeholder="Collez le contenu de l'e-mail..."
+              required></textarea>
+          </div>
+          <button type="submit" class="analyze-btn">Analyser l'e-mail</button>
+        </form>
+
+        <div id="email-result" class="email-result" aria-live="polite">
+          Remplissez le formulaire puis cliquez sur « Analyser l'e-mail ».
+        </div>
+      </section>
+    </section>
+
+    <!-- TAB: News -->
+    <section id="news-tab" class="tab-content">
+      <section class="module-container">
+        <h2>Actualités Cybersécurité</h2>
+        <p>Les dernières actualités en matière de sécurité.</p>
+        <div id="titles" class="articles-grid"></div>
+      </section>
+    </section>
+  </div>
+
+  <script src="js/data-manager.js"></script>
+  <script src="js/navigation.js"></script>
+  <script src="js/dashboard.js"></script>
   <script src="js/password.js"></script>
   <script src="js/cipher.js"></script>
+  <script src="js/phishing.js"></script>
+  <script src="js/report.js"></script>
 </body>
 
 </html>
