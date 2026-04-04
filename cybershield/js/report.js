@@ -4,6 +4,8 @@
 		passwordStrength: "cybershield-password-last-strength",
 		emailAnalyses: "cybershield-email-analyses",
 		newsCache: "cybershield-news-cache",
+		newsVisibleArticles: "cybershield-news-visible-articles",
+		newsVisibleCount: "cybershield-news-visible-count",
 	};
 
 	function readJsonFromStorage(key, defaultValue) {
@@ -26,6 +28,14 @@
 		);
 		const emailAnalyses = readJsonFromStorage(STORAGE_KEYS.emailAnalyses, []);
 		const newsCache = readJsonFromStorage(STORAGE_KEYS.newsCache, []);
+		const newsVisibleArticles = readJsonFromStorage(
+			STORAGE_KEYS.newsVisibleArticles,
+			[],
+		);
+		const newsVisibleCount = readJsonFromStorage(
+			STORAGE_KEYS.newsVisibleCount,
+			null,
+		);
 
 		return {
 			quizScores: Array.isArray(quizScores) ? quizScores : [],
@@ -33,6 +43,11 @@
 				typeof passwordStrength === "string" ? passwordStrength : "-",
 			emailAnalyses: Array.isArray(emailAnalyses) ? emailAnalyses : [],
 			newsCache: Array.isArray(newsCache) ? newsCache : [],
+			newsVisibleArticles: Array.isArray(newsVisibleArticles)
+				? newsVisibleArticles
+				: [],
+			newsVisibleCount:
+				typeof newsVisibleCount === "number" ? newsVisibleCount : null,
 		};
 	}
 
@@ -70,7 +85,13 @@
 				phishing: emailsPhishing,
 				phishingRate: phishingRate,
 			},
-			news: data.newsCache,
+			news: data.newsVisibleArticles.length
+				? data.newsVisibleArticles
+				: data.newsCache,
+			newsVisibleCount:
+				data.newsVisibleCount !== null
+					? data.newsVisibleCount
+					: data.newsVisibleArticles.length || data.newsCache.length,
 			generatedAt: new Date().toISOString(),
 			generatedAtReadable: new Date().toLocaleString("fr-FR"),
 		};

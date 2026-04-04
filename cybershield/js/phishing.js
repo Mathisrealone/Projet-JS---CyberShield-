@@ -355,6 +355,12 @@ function setupSourceFilter(root, articles) {
 
 		count.textContent = `${filtered.length} article(s)`;
 		renderArticleCards(root, filtered);
+
+		if (typeof dataManager !== "undefined") {
+			dataManager.setVisibleNewsCount(filtered.length);
+			dataManager.setVisibleNewsArticles(filtered);
+			window.dispatchEvent(new Event("data-updated"));
+		}
 	};
 
 	select.addEventListener("change", applyFilter);
@@ -401,12 +407,19 @@ async function main() {
 		}
 
 		if (!articles.length) {
+			if (typeof dataManager !== "undefined") {
+				dataManager.setVisibleNewsCount(0);
+				dataManager.setVisibleNewsArticles([]);
+				window.dispatchEvent(new Event("data-updated"));
+			}
 			root.innerHTML = `<div class="notice">Aucun article trouvé.</div>`;
 			return;
 		}
 
 		if (typeof dataManager !== "undefined") {
 			dataManager.cacheNews(articles);
+			dataManager.setVisibleNewsArticles(articles);
+			dataManager.setVisibleNewsCount(articles.length);
 			window.dispatchEvent(new Event("data-updated"));
 		}
 

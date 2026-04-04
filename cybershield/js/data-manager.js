@@ -127,8 +127,32 @@ class DataManager {
 	 * NEWS - Compter le nombre d'actualités en cache
 	 */
 	getNewsCount() {
+		const visibleCount = this.get("news-visible-count", null);
+		if (typeof visibleCount === "number") return visibleCount;
+
 		const news = this.get("news-cache", []);
 		return news.length;
+	}
+
+	/**
+	 * NEWS - Définir le nombre d'actualités visibles (après filtre)
+	 */
+	setVisibleNewsCount(count) {
+		this.set("news-visible-count", Number(count) || 0);
+	}
+
+	/**
+	 * NEWS - Définir les actualités actuellement visibles
+	 */
+	setVisibleNewsArticles(articles) {
+		this.set("news-visible-articles", Array.isArray(articles) ? articles : []);
+	}
+
+	/**
+	 * NEWS - Récupérer les actualités actuellement visibles
+	 */
+	getVisibleNewsArticles() {
+		return this.get("news-visible-articles", []);
 	}
 
 	/**
