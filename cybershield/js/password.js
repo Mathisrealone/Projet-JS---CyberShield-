@@ -21,9 +21,34 @@ const commonPassword = [
 	"jetaime",
 ];
 
+function calculatePasswordEntropy(password) {
+	if (!password || password.length === 0) return 0;
+
+	const hasLower = /[a-z]/.test(password);
+	const hasUpper = /[A-Z]/.test(password);
+	const hasDigit = /[0-9]/.test(password);
+	const hasSymbol = /[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/.test(password);
+
+	let alphabetSize = 0;
+	if (hasLower) alphabetSize += 26;
+	if (hasUpper) alphabetSize += 26;
+	if (hasDigit) alphabetSize += 10;
+	if (hasSymbol) alphabetSize += 32;
+
+	if (alphabetSize === 0) return 0;
+
+	const entropy = password.length * Math.log2(alphabetSize);
+	return Number(entropy.toFixed(2));
+}
+
 function analyzePassword(password) {
 	if (password === "") {
-		return { score: 0, strength: "En attente...", isCommon: false };
+		return {
+			score: 0,
+			strength: "En attente...",
+			isCommon: false,
+			entropy: 0,
+		};
 	}
 
 	let score = 0;
@@ -45,6 +70,7 @@ function analyzePassword(password) {
 			score: 0,
 			strength: "Très Faible",
 			isCommon: true,
+			entropy: calculatePasswordEntropy(password),
 		};
 	}
 
@@ -75,6 +101,7 @@ function analyzePassword(password) {
 		score: score,
 		strength: strength,
 		isCommon: isCommon,
+		entropy: calculatePasswordEntropy(password),
 	};
 }
 
@@ -99,7 +126,12 @@ if (passwordInput) {
 		}
 
 		forceDisplay.innerText = result.strength;
-		scoreDisplay.innerText = "Score : " + result.score + "/100";
+		scoreDisplay.innerText =
+			"Score : " +
+			result.score +
+			"/100 | Entropie : " +
+			result.entropy +
+			" bits";
 
 		// INTÉGRATION: Sauvegarder dans le DataManager et notifier le dashboard
 		if (currentPassword.length > 0) {
